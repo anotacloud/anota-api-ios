@@ -194,10 +194,18 @@ public final class AnotaClient {
 
     // MARK: - Webhooks
 
+    /// Lists a form's webhooks. Each row has id, url, events, enabled, secretHint and secretNote.
+    /// The full signing secret is never returned here: secretHint is a masked form
+    /// ("whsec_…" + last 4 characters, or just "whsec_…" for short secrets) that identifies
+    /// which secret a receiver holds, and secretNote explains the show-once rule. To replace a
+    /// lost secret, delete the webhook and add it again.
     public func listWebhooks(formId: String) async throws -> Any {
         try await request("GET", "/forms/\(formId)/webhooks")
     }
 
+    /// Registers a webhook URL that receives submission.created events. The response
+    /// (id, formId, url, secret, note) is the ONLY place the full signing secret appears:
+    /// store it now, it cannot be read back later (listWebhooks shows only secretHint).
     public func addWebhook(formId: String, url: String) async throws -> Any {
         try await request("POST", "/forms/\(formId)/webhooks", body: ["url": url])
     }
